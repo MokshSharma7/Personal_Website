@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moksh Sharma — Beyond the Resume</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="icon" type="image/png" href="favicon.png" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<style>
+  :root{
+    --bg:#08080a;
+    --bg-soft:#0e0e12;
+    --fg:#f4f3ef;
+    --muted:#8a8a93;
+    --accent:#b6ff3c;
+    --accent2:#7c5cff;
+    --line: rgba(244,243,239,0.1);
+    --card: rgba(255,255,255,0.03);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family: 'Neue Montreal','Helvetica Neue',Arial,sans-serif;
+    overflow-x:hidden;
+    cursor:none;
+  }
+  ::selection{ background:var(--accent); color:#08080a; }
+
+  /* ---------- Custom cursor ---------- */
+  .cursor-dot, .cursor-ring{
+    position:fixed; top:0; left:0; pointer-events:none; z-index:9999;
+    border-radius:50%; will-change:transform; backface-visibility:hidden;
+  }
+  .cursor-dot{ width:6px; height:6px; background:var(--accent); }
+  .cursor-ring{ width:34px; height:34px; border:1px solid rgba(244,243,239,0.4); transition: width .25s, height .25s, border-color .25s, background .25s; }
+  .cursor-ring.active{ width:64px; height:64px; background:rgba(182,255,60,0.08); border-color:var(--accent); }
+  @media (hover:none){ .cursor-dot,.cursor-ring{display:none;} body{cursor:auto;} }
+
+  .progress{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    z-index:9998; transition:width .05s linear;
+  }
+
+  .noise{
+    position:fixed; inset:0; z-index:1; pointer-events:none; opacity:.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  .wrap{ max-width:1200px; margin:0 auto; padding:0 32px; }
+  section{ position:relative; z-index:2; }
+
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:26px 40px; mix-blend-mode:difference;
+  }
+  .logo{ font-weight:600; letter-spacing:-0.02em; font-size:18px; }
+  nav ul{ list-style:none; display:flex; gap:36px; }
+  nav a{ font-size:13px; letter-spacing:.08em; text-transform:uppercase; opacity:.75; position:relative; }
+  nav a::after{ content:''; position:absolute; left:0; bottom:-4px; width:0; height:1px; background:var(--fg); transition:width .3s ease; }
+  nav a:hover::after, nav a.current::after{ width:100%; }
+  nav a:hover, nav a.current{ opacity:1; }
+
+  .reveal{ opacity:0; transform:translateY(40px); }
+  .kicker{ font-size:13px; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); margin-bottom:14px; display:block; }
+
+  /* ---------- hero split ---------- */
+  .life-hero{
+    min-height:100vh; display:flex; align-items:center; padding-top:120px; padding-bottom:60px;
+    position:relative;
+  }
+  .split{
+    display:grid; grid-template-columns:0.9fr 1.1fr; gap:70px; align-items:center;
+  }
+  /* avatar stage */
+  .avatar-stage{
+    position:relative; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+  }
+  .avatar-blob{
+    position:absolute; inset:0; z-index:0;
+    background: radial-gradient(circle at 30% 25%, rgba(182,255,60,.35), transparent 55%),
+                radial-gradient(circle at 75% 75%, rgba(124,92,255,.4), transparent 55%);
+    filter:blur(30px); animation: blobSpin 14s linear infinite;
+    border-radius:50%;
+  }
+  @keyframes blobSpin{ from{ transform:rotate(0deg) scale(1);} 50%{ transform:rotate(180deg) scale(1.08);} to{ transform:rotate(360deg) scale(1);} }
+  .avatar-float{
+    position:relative; z-index:2; width:78%; animation: avatarFloat 5s ease-in-out infinite;
+  }
+  #avatarWrap{ transform-style:preserve-3d; }
+  @keyframes avatarFloat{ 0%,100%{ transform:translateY(0px);} 50%{ transform:translateY(-16px);} }
+  .sparkle{
+    position:absolute; z-index:1; border-radius:50%; background:var(--accent);
+    box-shadow:0 0 12px var(--accent); opacity:.8; animation: twinkle 2.4s ease-in-out infinite;
+  }
+  .sparkle:nth-child(2){ background:var(--accent2); box-shadow:0 0 12px var(--accent2); animation-delay:.8s; }
+  .sparkle:nth-child(3){ animation-delay:1.4s; }
+  @keyframes twinkle{ 0%,100%{ opacity:.2; transform:scale(.7);} 50%{ opacity:1; transform:scale(1.2);} }
+
+  #avatarWrap{ filter: drop-shadow(0 0 0 rgba(0,0,0,0)); transition: filter .4s ease; }
+  #avatarWrap.popped{ filter: drop-shadow(0 34px 40px rgba(0,0,0,.55)) drop-shadow(0 0 40px rgba(182,255,60,.12)); }
+
+  .speech-bubble{
+    position:absolute; top:2%; right:-4%; z-index:6; max-width:230px;
+    background:var(--fg); color:#08080a; padding:14px 18px; border-radius:18px 18px 4px 18px;
+    font-size:14.5px; font-weight:500; line-height:1.4; box-shadow:0 16px 34px rgba(0,0,0,.4);
+    opacity:0; transform:scale(.6) translateY(14px); transform-origin:bottom right; pointer-events:none;
+  }
+  .speech-bubble::after{
+    content:''; position:absolute; right:22px; bottom:-7px; width:14px; height:14px;
+    background:var(--fg); transform:rotate(45deg); border-radius:0 0 3px 0;
+  }
+
+  .life-eyebrow{ font-size:13px; letter-spacing:.15em; text-transform:uppercase; color:var(--muted); margin-bottom:22px; display:flex; align-items:center; gap:10px; }
+  .life-eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent); }
+  h1.life-title{ font-size:clamp(42px,6vw,84px); line-height:1; font-weight:600; letter-spacing:-0.03em; margin-bottom:26px; }
+  h1.life-title .grad{ background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .life-intro{ font-size:19px; line-height:1.75; color:var(--muted); max-width:520px; margin-bottom:20px; }
+  .life-intro strong{ color:var(--fg); font-weight:500; }
+  .back-link{ display:inline-flex; align-items:center; gap:8px; margin-top:12px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+  .back-link:hover{ color:var(--fg); }
+
+  /* ---------- interests / hobbies ---------- */
+  .life-section{ padding:100px 0; }
+  .section-head{ margin-bottom:56px; }
+  h2{ font-size:clamp(32px,4.6vw,54px); font-weight:600; letter-spacing:-0.03em; }
+
+  .tag-cloud{ display:flex; flex-wrap:wrap; gap:14px; }
+  .tag-pill{
+    border:1px solid var(--line); border-radius:100px; padding:14px 26px; background:var(--card);
+    font-size:15px; display:flex; align-items:center; gap:10px; transition: transform .3s, border-color .3s, background .3s;
+  }
+  .tag-pill:hover{ transform:translateY(-4px); border-color:rgba(182,255,60,.5); background:rgba(182,255,60,.06); }
+  .tag-pill .emoji{ font-size:18px; }
+  .section-sub{ color:var(--muted); font-size:15px; margin-top:-40px; margin-bottom:40px; max-width:480px; }
+
+  /* ---------- goals / targets ---------- */
+  .goal-list{ border-top:1px solid var(--line); }
+  .goal-item{
+    display:flex; align-items:center; gap:24px; padding:28px 4px; border-bottom:1px solid var(--line);
+    position:relative; overflow:hidden; transition:padding-left .35s ease;
+  }
+  .goal-item::before{
+    content:''; position:absolute; left:0; bottom:-1px; height:2px; width:0;
+    background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .6s ease;
+  }
+  .goal-item:hover::before{ width:100%; }
+  .goal-item:hover{ padding-left:16px; }
+  .goal-num{ font-size:13px; color:var(--muted); width:24px; flex-shrink:0; }
+  .goal-icon{
+    width:46px; height:46px; border-radius:13px; background:var(--card); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
+    transition:border-color .3s, background .3s, transform .3s;
+  }
+  .goal-item:hover .goal-icon{ border-color:rgba(182,255,60,.5); background:rgba(182,255,60,.08); transform:scale(1.08) rotate(-6deg); }
+  .goal-text{ font-size:20px; font-weight:500; letter-spacing:-0.01em; }
+
+  /* ---------- travel / wanderlust ---------- */
+  .wanderlust-card{
+    position:relative; border-radius:24px; border:1px solid var(--line); overflow:hidden;
+    padding:56px 44px; background:linear-gradient(135deg,rgba(182,255,60,.05),rgba(124,92,255,.08));
+  }
+  .wanderlust-glow{
+    position:absolute; inset:-45%; z-index:0;
+    background:radial-gradient(circle at 35% 35%, rgba(182,255,60,.18), transparent 55%),
+               radial-gradient(circle at 65% 65%, rgba(124,92,255,.22), transparent 55%);
+    animation: blobSpin 18s linear infinite; filter:blur(20px);
+  }
+  .wanderlust-content{ position:relative; z-index:2; display:flex; align-items:center; gap:30px; }
+  .wanderlust-emoji{ font-size:56px; flex-shrink:0; }
+  .wanderlust-title{ font-size:clamp(22px,3vw,30px); font-weight:600; letter-spacing:-0.01em; }
+  .wanderlust-sub{ color:var(--muted); margin-top:8px; font-size:15.5px; max-width:460px; }
+
+  /* ---------- flashcards / gallery ---------- */
+  .polaroid-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:34px 26px; }
+  .polaroid{
+    position:relative; background:#f4f3ef; padding:10px 10px 46px; border-radius:3px;
+    box-shadow:0 16px 34px rgba(0,0,0,.5); cursor:pointer;
+    transform:rotate(var(--r,-2deg)); transition:transform .35s ease, box-shadow .35s ease;
+  }
+  .polaroid:hover{ transform:rotate(0deg) scale(1.06) translateY(-8px); box-shadow:0 28px 54px rgba(0,0,0,.65); z-index:5; }
+  .polaroid .frame{ overflow:hidden; border-radius:2px; aspect-ratio:1/1; background:#111; }
+  .polaroid img{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease; }
+  .polaroid:hover img{ transform:scale(1.06); }
+  .polaroid .cap{
+    position:absolute; left:0; right:0; bottom:10px; text-align:center; font-size:12.5px;
+    color:#1c1c22; font-weight:500; letter-spacing:-0.01em; padding:0 10px;
+  }
+
+  .lightbox{
+    position:fixed; inset:0; z-index:200; background:rgba(4,4,6,.92);
+    display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none;
+    transition:opacity .3s ease; padding:40px;
+  }
+  .lightbox.open{ opacity:1; pointer-events:auto; }
+  .lightbox img{
+    max-width:min(640px,90vw); max-height:78vh; border-radius:6px; box-shadow:0 30px 80px rgba(0,0,0,.6);
+    transform:scale(.92); transition:transform .35s ease;
+  }
+  .lightbox.open img{ transform:scale(1); }
+  .lightbox .lb-cap{ position:absolute; bottom:52px; left:0; right:0; text-align:center; color:var(--muted); font-size:14px; }
+  .lightbox .lb-close{
+    position:absolute; top:32px; right:40px; font-size:14px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--fg); opacity:.7;
+  }
+  .lightbox .lb-close:hover{ opacity:1; }
+
+  footer{ padding:32px 0; border-top:1px solid var(--line); display:flex; justify-content:space-between; color:var(--muted); font-size:12px; }
+
+  @media (max-width:900px){
+    body{cursor:auto;} .cursor-dot,.cursor-ring{display:none;}
+    header{ padding:20px; } nav ul{ display:none; }
+    .split{ grid-template-columns:1fr; }
+    .avatar-stage{ max-width:340px; margin:0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="noise"></div>
+
+<header>
+  <div class="logo">MS.</div>
+  <nav>
+    <ul>
+      <li><a href="index.html#work">Work</a></li>
+      <li><a href="index.html#about">About</a></li>
+      <li><a href="about-life.html" class="current">Life</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- HERO SPLIT -->
+<section class="life-hero">
+  <div class="wrap split">
+    <!-- LEFT: avatar -->
+    <div class="avatar-stage">
+      <div class="avatar-blob"></div>
+      <div class="sparkle" style="width:8px;height:8px; top:8%; left:12%;"></div>
+      <div class="sparkle" style="width:6px;height:6px; top:20%; right:8%;"></div>
+      <div class="sparkle" style="width:10px;height:10px; bottom:12%; left:6%;"></div>
+      <div class="avatar-float">
+       <div id="avatarWrap">
+        <svg viewBox="0 0 300 340" xmlns="http://www.w3.org/2000/svg" style="width:100%; display:block;">
+          <!-- shoulders / hoodie -->
+          <path d="M40 340 C40 270 90 240 150 240 C210 240 260 270 260 340 Z" fill="#1c1c22" stroke="rgba(244,243,239,0.08)" stroke-width="1"/>
+          <path d="M110 245 C130 260 170 260 190 245 L185 285 C170 300 130 300 115 285 Z" fill="#14141a"/>
+          <!-- neck -->
+          <rect x="130" y="205" width="40" height="45" rx="14" fill="#d9a066"/>
+          <!-- head -->
+          <ellipse cx="150" cy="150" rx="82" ry="86" fill="#e2ac79"/>
+          <!-- ears -->
+          <ellipse cx="70" cy="155" rx="12" ry="16" fill="#e2ac79"/>
+          <ellipse cx="230" cy="155" rx="12" ry="16" fill="#e2ac79"/>
+          <!-- hair -->
+          <path d="M64 130 C58 60 110 30 150 30 C195 30 240 62 236 132 C222 108 212 96 212 96 C200 118 176 70 150 70 C122 70 100 118 88 96 C88 96 78 108 64 130 Z" fill="#1c1a17"/>
+          <!-- eyebrows -->
+          <rect x="108" y="128" width="34" height="8" rx="4" fill="#1c1a17" id="browL"/>
+          <rect x="158" y="128" width="34" height="8" rx="4" fill="#1c1a17" id="browR"/>
+          <!-- eyes -->
+          <g id="eyes">
+            <ellipse cx="123" cy="150" rx="9" ry="11" fill="#1c1a17"/>
+            <ellipse cx="177" cy="150" rx="9" ry="11" fill="#1c1a17"/>
+            <circle cx="126" cy="146" r="2.4" fill="#fff"/>
+            <circle cx="180" cy="146" r="2.4" fill="#fff"/>
+          </g>
+          <!-- nose -->
+          <path d="M150 152 C148 168 144 176 150 180 C156 176 152 168 150 152" fill="none" stroke="#c48f5c" stroke-width="3" stroke-linecap="round"/>
+          <!-- smile (normal + big grin, crossfaded on hover) -->
+          <path id="mouthNormal" d="M118 190 Q150 216 182 190" fill="none" stroke="#7a3f2a" stroke-width="5" stroke-linecap="round"/>
+          <path id="teeth" d="M126 196 Q150 214 174 196 Q150 204 126 196 Z" fill="#fff" opacity="0"/>
+          <path id="mouthBig" d="M112 188 Q150 236 188 188" fill="none" stroke="#7a3f2a" stroke-width="6" stroke-linecap="round" opacity="0"/>
+          <!-- cheeks -->
+          <ellipse id="cheekL" cx="102" cy="178" rx="12" ry="7" fill="#ff9d84" opacity=".35"/>
+          <ellipse id="cheekR" cx="198" cy="178" rx="12" ry="7" fill="#ff9d84" opacity=".35"/>
+        </svg>
+       </div>
+       <div class="speech-bubble" id="speechBubble">Hey there! 👋</div>
+      </div>
+    </div>
+
+    <!-- RIGHT: intro -->
+    <div>
+      <div class="life-eyebrow"><span class="dot"></span> Not just the resume</div>
+      <h1 class="life-title">Beyond the<br><span class="grad">work.</span></h1>
+      <p class="life-intro">Outside client work and automation pipelines, it's mostly <strong>football</strong>, the <strong>gym</strong>, and whatever's happening in the world. This page is for the stuff that doesn't fit on a resume.</p>
+      <a href="index.html" class="back-link">← Back to the portfolio</a>
+    </div>
+  </div>
+</section>
+
+<!-- HOBBIES / INTERESTS -->
+<section class="life-section" id="interests">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">What I'm into</span>
+      <h2>Hobbies &amp;<br>interests.</h2>
+    </div>
+    <div class="tag-cloud reveal">
+      <div class="tag-pill"><span class="emoji">⚽</span> Football</div>
+      <div class="tag-pill"><span class="emoji">🏋️</span> Gym &amp; fitness</div>
+      <div class="tag-pill"><span class="emoji">🌍</span> Geopolitics &amp; historical politics</div>
+      <div class="tag-pill"><span class="emoji">✈️</span> Travelling</div>
+      <div class="tag-pill"><span class="emoji">🏆</span> Sports — pretty much everything</div>
+      <div class="tag-pill"><span class="emoji">🎧</span> Music</div>
+      <div class="tag-pill"><span class="emoji">🍽️</span> Chole bhature on a Sunday afternoon</div>
+    </div>
+  </div>
+</section>
+
+<!-- GOALS / TARGETS -->
+<section class="life-section" id="targets">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">What I'm chasing</span>
+      <h2>Current<br>targets.</h2>
+    </div>
+    <p class="section-sub reveal">No fixed finish line — just the things I'm actively working toward right now.</p>
+    <div class="goal-list reveal">
+      <div class="goal-item">
+        <span class="goal-num">01</span>
+        <span class="goal-icon">🚀</span>
+        <span class="goal-text">Get my agency on top</span>
+      </div>
+      <div class="goal-item">
+        <span class="goal-num">02</span>
+        <span class="goal-icon">🏃</span>
+        <span class="goal-text">Run a half marathon this year</span>
+      </div>
+      <div class="goal-item">
+        <span class="goal-num">03</span>
+        <span class="goal-icon">💪</span>
+        <span class="goal-text">Get jacked &amp; build serious wealth</span>
+      </div>
+      <div class="goal-item">
+        <span class="goal-num">04</span>
+        <span class="goal-icon">🧭</span>
+        <span class="goal-text">Stay original — stay me</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRAVEL -->
+<section class="life-section" id="travel">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Wanderlust</span>
+      <h2>Places &amp;<br>photos.</h2>
+    </div>
+    <div class="wanderlust-card reveal">
+      <div class="wanderlust-glow"></div>
+      <div class="wanderlust-content">
+        <span class="wanderlust-emoji">🌍</span>
+        <div>
+          <div class="wanderlust-title">Always plotting the next trip.</div>
+          <div class="wanderlust-sub">No fixed list yet — once the stamps start piling up, they'll show up here.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY / FLASHCARDS -->
+<section class="life-section" id="gallery">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">The reel</span>
+      <h2>Moments,<br>unfiltered.</h2>
+    </div>
+    <p class="section-sub reveal">A scattered pile of snapshots — matches, festivals, trips, and everything in between. Click one to zoom in.</p>
+    <div class="polaroid-grid" id="polaroidGrid">
+      <div class="polaroid reveal" style="--r:-3deg" data-cap="Arm day, wood-panel edition"><div class="frame"><img src="photos/photo-02.jpg" alt="Gym arm shot" loading="lazy"></div><div class="cap">Arm day, wood-panel edition</div></div>
+      <div class="polaroid reveal" style="--r:2deg" data-cap="Commute mode: on"><div class="frame"><img src="photos/photo-03.jpg" alt="Street selfie with backpack" loading="lazy"></div><div class="cap">Commute mode: on</div></div>
+      <div class="polaroid reveal" style="--r:-2deg" data-cap="Holi chaos, security detail included"><div class="frame"><img src="photos/photo-04.jpg" alt="Holi festival with police" loading="lazy"></div><div class="cap">Holi chaos, security detail included</div></div>
+      <div class="polaroid reveal" style="--r:3deg" data-cap="Temple run (literally)"><div class="frame"><img src="photos/photo-05.jpg" alt="Temple interior" loading="lazy"></div><div class="cap">Temple run (literally)</div></div>
+      <div class="polaroid reveal" style="--r:-2.5deg" data-cap="Match night with the boys"><div class="frame"><img src="photos/photo-06.jpg" alt="Football team at night" loading="lazy"></div><div class="cap">Match night with the boys</div></div>
+      <div class="polaroid reveal" style="--r:1.5deg" data-cap="Main character energy"><div class="frame"><img src="photos/photo-07.jpg" alt="Stylised photoshoot" loading="lazy"></div><div class="cap">Main character energy</div></div>
+      <div class="polaroid reveal" style="--r:-3deg" data-cap="The squad, blinded by flash"><div class="frame"><img src="photos/photo-08.jpg" alt="Group mirror selfie" loading="lazy"></div><div class="cap">The squad, blinded by flash</div></div>
+      <div class="polaroid reveal" style="--r:2.5deg" data-cap="Touch of class ⚽"><div class="frame"><img src="photos/photo-09.jpg" alt="Playing football" loading="lazy"></div><div class="cap">Touch of class ⚽</div></div>
+      <div class="polaroid reveal" style="--r:-2deg" data-cap="Rooftop, colors, chaos"><div class="frame"><img src="photos/photo-10.jpg" alt="Holi on a rooftop" loading="lazy"></div><div class="cap">Rooftop, colors, chaos</div></div>
+      <div class="polaroid reveal" style="--r:3deg" data-cap="Local mountain committee member"><div class="frame"><img src="photos/photo-11.jpg" alt="Monkey on a sign" loading="lazy"></div><div class="cap">Local mountain committee member</div></div>
+      <div class="polaroid reveal" style="--r:-1.5deg" data-cap="Rishikesh, after dark"><div class="frame"><img src="photos/photo-12.jpg" alt="Night bridge in Rishikesh" loading="lazy"></div><div class="cap">Rishikesh, after dark</div></div>
+      <div class="polaroid reveal" style="--r:2deg" data-cap="Community day — giving back"><div class="frame"><img src="photos/photo-13.jpg" alt="Community outreach event" loading="lazy"></div><div class="cap">Community day — giving back</div></div>
+      <div class="polaroid reveal" style="--r:-2.5deg" data-cap="GOAT moment, straight off the TV"><div class="frame"><img src="photos/photo-14.jpg" alt="Ronaldo with a trophy on TV" loading="lazy"></div><div class="cap">GOAT moment, straight off the TV</div></div>
+      <div class="polaroid reveal" style="--r:2.5deg" data-cap="Season 1 Champions 🏆"><div class="frame"><img src="photos/photo-15.jpg" alt="Holding a football trophy" loading="lazy"></div><div class="cap">Season 1 Champions 🏆</div></div>
+      <div class="polaroid reveal" style="--r:-3deg" data-cap="Somewhere in that crowd"><div class="frame"><img src="photos/photo-16.jpg" alt="In a crowd at an event" loading="lazy"></div><div class="cap">Somewhere in that crowd</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox">
+  <span class="lb-close" id="lbClose">Close ✕</span>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-cap" id="lbCap"></div>
+</div>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%;">
+    <span>© 2026 Moksh Sharma</span>
+    <a href="index.html">Back to portfolio →</a>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ---------- custom cursor (matches main site) ---------- */
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0, dx=0,dy=0, rx=0, ry=0, started=false;
+window.addEventListener('mousemove', e=>{
+  mx=e.clientX; my=e.clientY;
+  if(!started){ dx=rx=mx; dy=ry=my; started=true; }
+});
+function cursorLoop(){
+  dx += (mx-dx)*0.55; dy += (my-dy)*0.55;
+  rx += (mx-rx)*0.18; ry += (my-ry)*0.18;
+  dot.style.transform = `translate3d(${dx}px, ${dy}px, 0) translate(-50%,-50%)`;
+  ring.style.transform = `translate3d(${rx}px, ${ry}px, 0) translate(-50%,-50%)`;
+  requestAnimationFrame(cursorLoop);
+}
+requestAnimationFrame(cursorLoop);
+document.querySelectorAll('a,.tag-pill,.goal-item,.wanderlust-card,.polaroid,.lb-close').forEach(el=>{
+  el.addEventListener('mouseenter', ()=>ring.classList.add('active'));
+  el.addEventListener('mouseleave', ()=>ring.classList.remove('active'));
+});
+
+/* ---------- progress bar ---------- */
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement;
+  const pct = (h.scrollTop)/(h.scrollHeight - h.clientHeight)*100;
+  progress.style.width = pct+'%';
+});
+
+/* ---------- reveal on scroll ---------- */
+gsap.from('.life-eyebrow, .life-title, .life-intro, .back-link', { opacity:0, y:20, duration:1, stagger:0.12, delay:0.1 });
+document.querySelectorAll('.reveal').forEach(el=>{
+  gsap.to(el, { opacity:1, y:0, duration:0.9, ease:'power3.out', scrollTrigger:{ trigger:el, start:'top 88%' } });
+});
+gsap.from('.avatar-stage', { opacity:0, scale:0.85, duration:1.1, ease:'power3.out', delay:0.1 });
+
+/* ---------- avatar blink ---------- */
+function blink(){
+  gsap.to('#eyes', { scaleY:0.08, duration:0.07, transformOrigin:'center', ease:'power1.in',
+    onComplete:()=>{ gsap.to('#eyes', { scaleY:1, duration:0.12, ease:'power1.out' }); }
+  });
+  gsap.delayedCall(2.6 + Math.random()*3, blink);
+}
+gsap.delayedCall(1.5, blink);
+
+/* ---------- avatar mouse parallax tilt ---------- */
+const avatarWrap = document.getElementById('avatarWrap');
+const stage = document.querySelector('.avatar-stage');
+stage.addEventListener('mousemove', e=>{
+  const r = stage.getBoundingClientRect();
+  const px = (e.clientX - r.left)/r.width - 0.5;
+  const py = (e.clientY - r.top)/r.height - 0.5;
+  gsap.to(avatarWrap, { rotateY: px*14, rotateX: -py*14, duration:0.5, ease:'power2.out', transformPerspective:600 });
+});
+stage.addEventListener('mouseleave', ()=>{
+  gsap.to(avatarWrap, { rotateY:0, rotateX:0, duration:0.6, ease:'power3.out' });
+});
+
+/* ---------- hover: pop out of the screen + smile + speech bubble ---------- */
+const greetings = [
+  "Hey there! 👋",
+  "Oh, hi! Didn't see you there.",
+  "You found me!",
+  "Welcome to my corner of the internet.",
+  "Hi! Thanks for stopping by.",
+  "Hello, friend.",
+  "Sup? Good to see you.",
+  "Hey, I'm Moksh.",
+  "Glad you scrolled this far.",
+  "Yo! Let's build something great."
+];
+let lastGreetingIdx = -1;
+function nextGreeting(){
+  if(greetings.length===1) return greetings[0];
+  let idx;
+  do{ idx = Math.floor(Math.random()*greetings.length); } while(idx===lastGreetingIdx);
+  lastGreetingIdx = idx;
+  return greetings[idx];
+}
+
+const bubble = document.getElementById('speechBubble');
+stage.addEventListener('mouseenter', ()=>{
+  // avatar pops out toward the viewer
+  avatarWrap.classList.add('popped');
+  gsap.to(avatarWrap, { scale:1.1, y:-16, duration:0.55, ease:'back.out(1.6)' });
+
+  // bigger grin + teeth + rosier cheeks
+  gsap.to('#mouthNormal', { opacity:0, duration:0.25 });
+  gsap.to('#mouthBig', { opacity:1, duration:0.25 });
+  gsap.to('#teeth', { opacity:1, duration:0.3, delay:0.05 });
+  gsap.to('#cheekL, #cheekR', { opacity:0.65, duration:0.3 });
+
+  // speech bubble with a fresh greeting each time
+  bubble.textContent = nextGreeting();
+  gsap.killTweensOf(bubble);
+  gsap.to(bubble, { opacity:1, scale:1, y:0, duration:0.5, ease:'back.out(2)', delay:0.1 });
+});
+stage.addEventListener('mouseleave', ()=>{
+  avatarWrap.classList.remove('popped');
+  gsap.to(avatarWrap, { scale:1, y:0, duration:0.5, ease:'power3.out' });
+
+  gsap.to('#mouthNormal', { opacity:1, duration:0.3 });
+  gsap.to('#mouthBig', { opacity:0, duration:0.3 });
+  gsap.to('#teeth', { opacity:0, duration:0.2 });
+  gsap.to('#cheekL, #cheekR', { opacity:0.35, duration:0.3 });
+
+  gsap.killTweensOf(bubble);
+  gsap.to(bubble, { opacity:0, scale:.6, y:14, duration:0.25, ease:'power2.in' });
+});
+
+/* ---------- gallery lightbox ---------- */
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lbImg');
+const lbCap = document.getElementById('lbCap');
+const lbClose = document.getElementById('lbClose');
+
+document.querySelectorAll('.polaroid').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    const img = card.querySelector('img');
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lbCap.textContent = card.dataset.cap || '';
+    lightbox.classList.add('open');
+  });
+});
+function closeLightbox(){ lightbox.classList.remove('open'); }
+lbClose.addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', e=>{ if(e.target === lightbox) closeLightbox(); });
+window.addEventListener('keydown', e=>{ if(e.key === 'Escape') closeLightbox(); });
+</script>
+</body>
+</html>
